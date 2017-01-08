@@ -5,8 +5,8 @@ import os
 
 
 class SimpleHttpServer:
-    def __init__(self, www_dir, host, port):
-        self.www_dir = www_dir
+    def __init__(self, static_dir, host, port):
+        self.static_dir = static_dir
         self.host = host
         self.port = port
 
@@ -16,7 +16,7 @@ class SimpleHttpServer:
             self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
             self.socket.bind((self.host, self.port))
             print("Http server starts on port {0}. Root dir is {1}.".format(self.port,
-                os.path.join(os.path.dirname(os.path.abspath(__file__)), self.www_dir)))
+                os.path.join(os.path.dirname(os.path.abspath(__file__)), self.static_dir)))
             print("Please press Ctrl+C to shut down the server and exit.")
             self._wait_for_connections()
         except socket.error as e:
@@ -63,14 +63,14 @@ class SimpleHttpServer:
                 if resource_addr == "":
                     resource_addr = "index.html"
                 try:
-                    with open(os.path.join(self.www_dir, resource_addr)) as f:
+                    with open(os.path.join(self.static_dir, resource_addr)) as f:
                         response_body = f.read()
                         status_code = 200
                         message = "OK"
                 except FileNotFoundError:
                     message = "Not Found"
                     status_code = 404
-                    with open(os.path.join(self.www_dir, "404.html")) as f:
+                    with open(os.path.join(self.static_dir, "404.html")) as f:
                         response_body = f.read()
                 headers.append(("Content-Type", "text/html;charset=utf-8"))
                 headers.append(("Content-Language", "en"))
@@ -98,8 +98,9 @@ class SimpleHttpServer:
         return response
 
 
-server = SimpleHttpServer('myproject', '', 8000)
-try:
-    server.start()
-except KeyboardInterrupt:
-    server.shutdown()
+if __name__ == "__main__":
+    server = SimpleHttpServer('static', '', 8000)
+    try:
+        server.start()
+    except KeyboardInterrupt:
+        server.shutdown()
